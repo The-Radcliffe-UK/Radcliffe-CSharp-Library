@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Radcliffe.Console/Radcliffe.Console.csproj" />
+  <Project Path="Radcliffe.Core/Radcliffe.Core.csproj" />
+  <Project Path="Radcliffe.WinForms/Radcliffe.WinForms.csproj" />
+</Solution>

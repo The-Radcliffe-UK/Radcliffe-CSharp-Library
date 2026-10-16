@@ -7,7 +7,7 @@ namespace Radcliffe.Core.Databases
     public class AccessDatabase : DatabaseConnection
     {
 
-        private Dictionary<SQLComparator, string> _comparators = new Dictionary<SQLComparator, string>() {
+        private Dictionary<SQLComparator, string> _comparators = new() {
             { SQLComparator.EQUAL, "=" },
             { SQLComparator.GREATER_THAN, ">"  },
             { SQLComparator.LESS_THAN, "<"  },
@@ -42,15 +42,15 @@ namespace Radcliffe.Core.Databases
 
         public override SQLResult Execute(string sql)
         {
-            SQLResult result = new SQLResult();
+            SQLResult result = new();
 #pragma warning disable CA1416 // Validate platform compatibility
             try
             {
-                using OleDbConnection connection = new OleDbConnection(_connectionString);
+                using OleDbConnection connection = new(_connectionString);
 
                 connection.Open();
 
-                using OleDbCommand command = new OleDbCommand(sql, connection);
+                using OleDbCommand command = new(sql, connection);
                 using OleDbDataReader reader = command.ExecuteReader();
 
                 string[] fields = new string[reader.FieldCount];

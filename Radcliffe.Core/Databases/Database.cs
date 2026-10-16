@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Radcliffe.Core.Databases
 {
@@ -70,48 +69,57 @@ namespace Radcliffe.Core.Databases
 			return SQLQuery(sql_query);
 		}
 
-		public SQLResult Update(string table, string idField, int idValue, Dictionary<string, string> values)
+		public SQLResult Update(string table, string idField, string idValue, List<(string field, string value)> values)
 		{
-			string sql_query = "UPDATE " + _database.QuoteFieldName(table) + " SET ";
+			string sql_query = "UPDATE " + _database.QuoteTableName(table) + " SET ";
 			for (int i = 0; i < values.Count; i++)
 			{
-				KeyValuePair<string, string> entry = values.ElementAt(i);
-                sql_query += entry.Key + " = '" + entry.Value + "'";
+                (string field, string value) entry = values[i];
+                sql_query += _database.QuoteFieldName(entry.field) + " = " + entry.value;
 				if (i < (values.Count - 1))
 				{
 					sql_query += ", ";
 				}
             }
 
-			sql_query += "WHERE " + idField + " = " + idValue.ToString() + ";";
+			sql_query += " WHERE " + _database.QuoteFieldName( idField) + " " + _database.ComparatorToString( SQLComparator.EQUAL ) + " " + idValue + ";";
 
 			return SQLQuery(sql_query);
         }
 
-        public void Insert(string table, string[] fields, string[] values, bool debug = false)
+        public SQLResult Insert(string table, List<(string field, string value)> values)
         {
-			/*$sql_query = "INSERT INTO `". $table. "` (";
+			string sql_query = "INSERT INTO " + _database.QuoteTableName(table) + " (";
 
-            foreach ($fields as $field) {
-				$sql_query.= "`". $field. "`,";
+			for (int i = 0; i < values.Count; i++)
+			{
+				sql_query += _database.QuoteFieldName( values[i].field );
+				if (i < (values.Count - 1))
+				{
+					sql_query += ", ";
+				}
+			}
+
+			sql_query += ") VALUES (";
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                sql_query += values[i].value;
+                if (i < (values.Count - 1))
+                {
+                    sql_query += ", ";
+                }
             }
-			$sql_query = rtrim($sql_query, ','). ") VALUES (";
 
-            foreach ($values as $val) {
-				$sql_query.= $this->Quote($val). ",";
-            }
-			$sql_query = rtrim($sql_query, ','). ");";
+            sql_query += ");";
 
-            if ($debug) echo $sql_query;
-
-            reurn $this->query($sql_query);
-			*/
+			return _database.Execute( sql_query );
         }
 
-        public void Del(string table, string searchField, string searchValue)
+        public SQLResult Del(string table, string idField, string idValue)
         {
-			/*$sql_query = "DELETE FROM `". $table. "` WHERE `". $searchField. "` = ". $this->Quote($searchValue);
-            return $this->query($sql_query);*/
+			string sql_query = "DELETE FROM " + _database.QuoteTableName(table) + " WHERE " +  _database.QuoteFieldName( idField) + " " + _database.ComparatorToString(SQLComparator.EQUAL) + " " + idValue;
+            return _database.Execute( sql_query );
         }
     }
 }

@@ -98,10 +98,7 @@ namespace Radcliffe.Core.EventSystem {
         {
             for (int i = pListeners.Count - 1; i >= 0; i--)
             {
-                if (pListeners[i] != null)
-                {
-                    pListeners[i].Invoke( arg0, arg1 );
-                }
+                pListeners[i]?.Invoke( arg0, arg1 );
             }
         }
 

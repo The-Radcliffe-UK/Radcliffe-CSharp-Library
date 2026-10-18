@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace Radcliffe.Console.Core
 {
@@ -73,6 +74,36 @@ namespace Radcliffe.Console.Core
         public static bool FloatRangeCheck(float value, float min, float max)
         {
             return (value >= min) && (value <= max);
+        }
+
+        public static string PasswordInput(bool maskInput = true)
+        {
+            string password = "";
+            ConsoleKeyInfo key;
+
+            do
+            {
+                key = System.Console.ReadKey( intercept: true );
+
+                if (key.Key == ConsoleKey.Backspace && password.Length > 0)
+                {
+                    password = password.Substring( 0, password.Length - 1 );
+                    if (maskInput)
+                    {
+                        System.Console.Write( "\b \b" ); // Remove last asterisk
+                    }
+                } else if (!char.IsControl( key.KeyChar ))
+                {
+                    password += key.KeyChar;
+                    if (maskInput)
+                    {
+                        System.Console.Write( "*" );
+                    }
+                }
+            } while (key.Key != ConsoleKey.Enter);
+
+            System.Console.WriteLine();
+            return password;
         }
     }
 }

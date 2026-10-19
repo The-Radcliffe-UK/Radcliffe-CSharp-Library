@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
 namespace Radcliffe.Core.FileSystem.Files {
-    public abstract class File<TData, TEncoding> {
+    public class BaseFile { }
+    public abstract class File<TData, TEncoding> : BaseFile {
 
         protected string pFileExt;
         protected string pFileName;

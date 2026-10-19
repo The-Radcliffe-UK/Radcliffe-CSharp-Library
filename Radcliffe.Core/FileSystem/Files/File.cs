@@ -12,8 +12,9 @@ namespace Radcliffe.Core.FileSystem.Files {
         protected string pFileName;
         protected Directory pParent;
         private ConcurrentQueue<(Func<(OperationResult, TData)> operation, Event<OperationResult, TData> onComplete)> _operationQueue = new();
-        private ConcurrentDictionary<Guid, bool> _dequeueOperations = new();
+        private ConcurrentDictionary<int, bool> _dequeueOperations = new();
         private Task<(OperationResult, TData)> _currentOperation;
+        protected int _dequeueCount = 0;
 
         public File(string name, ref Directory parent) {
             pFileExt = "txt";
@@ -38,20 +39,21 @@ namespace Radcliffe.Core.FileSystem.Files {
             item.operation = operation;
             item.onComplete = onComplete;
             _operationQueue.Enqueue( item );
-            Guid _dequeueGuid =  Guid.CreateVersion7();
-            _dequeueOperations.TryAdd(_dequeueGuid, true );
-            _ = DequeueOperations( _dequeueGuid );
+            int _dequeueID = _dequeueCount++;
+
+            _dequeueOperations.TryAdd(_dequeueID, true );
+            _ = DequeueOperations(_dequeueID);
         }
 
-        private async Task DequeueOperations(Guid id)
+        private async Task DequeueOperations(int id)
         {
             while (_operationQueue.Count > 0)
             {
                 if(_dequeueOperations.Count > 1)
                 {
-                    Guid newestOperation = Guid.Empty;
+                    int newestOperation = 0;
 
-                    foreach (Guid operationId in _dequeueOperations.Keys)
+                    foreach (int operationId in _dequeueOperations.Keys)
                     {
                         if (operationId > newestOperation)
                         {
@@ -81,6 +83,7 @@ namespace Radcliffe.Core.FileSystem.Files {
             if (_operationQueue.IsEmpty)
             {
                 _dequeueOperations.Clear();
+                _dequeueCount = 0;
             }
         }
         protected abstract TEncoding Encode(TData data);

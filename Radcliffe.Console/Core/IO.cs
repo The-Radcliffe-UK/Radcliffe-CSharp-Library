@@ -1,6 +1,5 @@
-﻿using System;
-using System.Text.RegularExpressions;
-
+﻿using Radcliffe.Core.Data;
+using System;
 namespace Radcliffe.Console.Core
 {
     public class IO
@@ -104,6 +103,87 @@ namespace Radcliffe.Console.Core
 
             System.Console.WriteLine();
             return password;
+        }
+
+        public static string MaskedInput(string mask, bool strict = false, bool forceUpper = false, bool forceLower = false)
+        {
+            InputMask returnValue = new InputMask(mask, strict, forceUpper, forceLower);
+            string currentInput = "";
+            int currentCharacter = 0;
+            ConsoleKeyInfo key;
+
+            bool checkLiterals = true;
+            while (checkLiterals)
+            {
+                if (returnValue.IsLiteralAtPosition(currentCharacter, out char nextChar))
+                {
+                    System.Console.Write(nextChar);
+                    currentInput += nextChar;
+                    currentCharacter++;
+                }
+                else
+                {
+                    checkLiterals = false;
+                }
+            }
+
+            do
+            {
+                key = System.Console.ReadKey(intercept: true);
+
+                if (key.Key == ConsoleKey.Backspace && currentInput.Length > 0)
+                {
+                    currentInput = currentInput.Substring(0, currentInput.Length - 1);
+                    System.Console.Write("\b \b"); // Remove last character
+                    currentCharacter--;
+                    checkLiterals = true;
+                    while (checkLiterals)
+                    {
+                        if (returnValue.IsLiteralAtPosition(currentCharacter, out char nextChar))
+                        {
+                            currentInput = currentInput.Substring(0, currentInput.Length - 1);
+                            System.Console.Write("\b \b"); // Remove last character
+                            currentCharacter--;
+                        }
+                        else
+                        {
+                            checkLiterals = false;
+                        }
+                    }
+                }
+                else if (!char.IsControl(key.KeyChar))
+                {
+                    char input = key.KeyChar;
+                    bool valid = returnValue.TryFormatCharAtPosition(input, currentCharacter, out char formatedInput);
+                    if (valid)
+                    {
+                        System.Console.Write(formatedInput);
+                        currentInput += formatedInput;
+                        currentCharacter++;
+                        checkLiterals = true;
+                        while (checkLiterals)
+                        {
+                            if (returnValue.IsLiteralAtPosition(currentCharacter, out char nextChar))
+                            {
+                                System.Console.Write(nextChar);
+                                currentInput += nextChar;
+                                currentCharacter++;
+                            }
+                            else
+                            {
+                                checkLiterals = false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        System.Console.Beep();
+                    }
+                }
+            } while (key.Key != ConsoleKey.Enter || currentInput.Length < returnValue.mask.Length);
+
+            System.Console.WriteLine();
+            return currentInput;
         }
     }
 }

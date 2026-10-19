@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Console-Example/Console-Example.csproj" Id="00bd2ae7-3a00-4b3f-a66a-ed262543a53a" />
   <Project Path="Radcliffe.Console/Radcliffe.Console.csproj">
     <BuildType Project="Release" />
   </Project>

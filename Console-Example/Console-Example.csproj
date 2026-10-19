@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Console_Example</RootNamespace>
+    <ImplicitUsings>false</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Radcliffe.Console\Radcliffe.Console.csproj" />
+    <ProjectReference Include="..\Radcliffe.Core\Radcliffe.Core.csproj" />
+  </ItemGroup>
+
+</Project>

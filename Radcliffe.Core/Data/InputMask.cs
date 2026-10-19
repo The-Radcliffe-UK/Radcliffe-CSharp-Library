@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Radcliffe.Core.Data {
     /// <summary>
@@ -8,7 +8,7 @@ namespace Radcliffe.Core.Data {
     /// Supports flexible input formats, strict vs non-strict parsing, and casing enforcement.
     ///
     /// <para>
-    /// Mask Syntax:
+    /// mask Syntax:
     /// Each character in the mask defines a rule or literal:
     /// <list type="table">
     /// <item><term>L</term><description>Letter (A-Z, a-z) required.</description></item>
@@ -33,19 +33,19 @@ namespace Radcliffe.Core.Data {
     /// </para>
     /// </summary>
     public class InputMask {
-        public string Mask { get; }
-        public bool Strict { get; }
-        public bool ForceUpper { get; }
-        public bool ForceLower { get; }
+        public string mask { get; }
+        public bool strict { get; }
+        public bool forceUpper { get; }
+        public bool forceLower { get; }
 
         public InputMask(string mask, bool strict = false, bool forceUpper = false, bool forceLower = false)
         {
-            Mask = mask;
-            Strict = strict;
-            ForceUpper = forceUpper;
-            ForceLower = forceLower;
+            this.mask = mask;
+            this.strict = strict;
+            this.forceUpper = forceUpper;
+            this.forceLower = forceLower;
 
-            if (ForceUpper && ForceLower)
+            if (this.forceUpper && this.forceLower)
             {
                 throw new ArgumentException( "Cannot force both upper and lower casing." );
             }
@@ -55,13 +55,40 @@ namespace Radcliffe.Core.Data {
         /// The total length of the input including literal characters.
         /// This is the full length of the formatted string.
         /// </summary>
-        public int FormattedLength => Mask.Length;
+        public int FormattedLength { get { return mask.Length; } }
 
         /// <summary>
         /// The total length of the input *excluding* literals.
         /// This counts only required and optional data characters.
         /// </summary>
-        //public int UnformattedLength => Mask.Count(c =>c is 'L' or '?' or '0' or '9' or '#' or 'A' or 'a' or 'C' );
+        public int UnformattedLength
+        {
+            get
+            {
+                return mask.Count(c => c is 'L' or '?' or '0' or '9' or '#' or 'A' or 'a' or 'C');
+            }
+        }
+
+        public bool IsLiteralAtPosition(int position, out char formattedChar)
+        {
+            if (position < 0 || position >= mask.Length)
+            {
+                formattedChar = '\0';
+                return false;
+            }
+
+            char maskChar = mask[position];
+
+            if (!IsMaskChar(maskChar))
+            {
+                // Must match literal if strict; else accept and just move on
+                formattedChar = maskChar;
+                return true;
+            }
+
+            formattedChar = '\0';
+            return false;
+        }
 
         /// <summary>
         /// Attempts to validate and format a single character at a specific position in the mask.
@@ -74,17 +101,17 @@ namespace Radcliffe.Core.Data {
         {
             formattedChar = inputChar;
 
-            if (position < 0 || position >= Mask.Length)
+            if (position < 0 || position >= mask.Length)
             {
                 return false;
             }
 
-            char maskChar = Mask[position];
+            char maskChar = mask[position];
 
             if (!IsMaskChar( maskChar ))
             {
                 // Must match literal if strict; else accept and just move on
-                bool valid = (!Strict || inputChar == maskChar);
+                bool valid = (!strict || inputChar == maskChar);
                 formattedChar = maskChar;
                 return valid;
             }
@@ -112,21 +139,21 @@ namespace Radcliffe.Core.Data {
             StringBuilder output = new();
             int inputIndex = 0;
 
-            for (int maskIndex = 0; maskIndex < Mask.Length; maskIndex++)
+            for (int maskIndex = 0; maskIndex < mask.Length; maskIndex++)
             {
-                if (inputIndex >= input.Length && IsMaskChar( Mask[maskIndex] ))
+                if (inputIndex >= input.Length && IsMaskChar( mask[maskIndex] ))
                 {
                     return false; // input ended too soon
                 }
 
-                char maskChar = Mask[maskIndex];
+                char maskChar = mask[maskIndex];
 
                 if (IsMaskChar( maskChar ))
                 {
                     // Skip non-mask characters in input
                     while (inputIndex < input.Length && !IsValidCharForMask( maskChar, input[inputIndex] ))
                     {
-                        if (Strict)
+                        if (strict)
                         {
                             return false;
                         }
@@ -150,7 +177,7 @@ namespace Radcliffe.Core.Data {
                 } else
                 {
                     // Literal character
-                    if (Strict)
+                    if (strict)
                     {
                         if (inputIndex >= input.Length || input[inputIndex] != maskChar)
                         {
@@ -214,12 +241,12 @@ namespace Radcliffe.Core.Data {
         /// </summary>
         private char FormatChar(char c)
         {
-            if (ForceUpper)
+            if (forceUpper)
             {
                 return char.ToUpper( c );
             }
 
-            if (ForceLower)
+            if (forceLower)
             {
                 return char.ToLower( c );
             }

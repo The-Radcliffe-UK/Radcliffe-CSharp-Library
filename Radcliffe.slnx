@@ -6,6 +6,7 @@
   <Project Path="Radcliffe.Core/Radcliffe.Core.csproj">
     <BuildType Project="Release" />
   </Project>
+  <Project Path="Radcliffe.WinCore/Radcliffe.WinCore.csproj" Id="0d0d24a0-2698-4a4b-b383-8194240e18f1" />
   <Project Path="Radcliffe.WinForms/Radcliffe.WinForms.csproj">
     <BuildType Project="Release" />
   </Project>

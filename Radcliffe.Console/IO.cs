@@ -48,9 +48,9 @@ namespace Radcliffe.ConsoleApp
             return returnValue;
         }
 
-        public static bool IntRangeCheck(int value, int min, int max)
+        public static bool IntRangeCheck(int? value, int min, int max)
         {
-            return (value >= min) && (value <= max);
+            return value == null || ((value >= min) && (value <= max));
         }
 
         public static float? FloatInput(string msg)
